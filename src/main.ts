@@ -37,10 +37,10 @@ Vue.filter('date', function(value: any) {
   return value ? dayjs(value).format('DD.MM.YYYY') : '';
 });
 Vue.filter('dayOfWeek', function(value: any) {
-  return dayjs(value).format('dddd');
+  return value ? dayjs(value).format('dddd') : '';
 });
 Vue.filter('time', function(value: any) {
-  return dayjs(value).format('HH:mm');
+  return value ? dayjs(value).format('HH:mm') : '';
 });
 Vue.filter('duration', function(value: any) {
   let hours = Math.floor(value / 3600);

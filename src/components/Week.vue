@@ -16,13 +16,13 @@
             <span>{{ slot.timeStart | time }}</span>
             <span class="is-size-7">
               &nbsp;
-              <fa :icon="['far', 'clock']" />
+              <fa :icon="['far', 'clock']"/>
               {{ slot.duration | duration }}
               &nbsp;
             </span>
             <a :href="'https://rocketbeans.tv/mediathek/video/' + slot.episodeId" target="_blank" rel="noopener noreferrer"
               class="has-text-grey" v-if="slot.episodeId">
-              <fa :icon="['fab', 'youtube']" />
+              <fa :icon="['fab', 'youtube']"/>
             </a>
           </div>
           <div>
