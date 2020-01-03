@@ -4,22 +4,27 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [13.x]
-
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - uses: actions/checkout@master
+    - name: Setup Node.js 13.x
+      uses: actions/setup-node@master
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 13.x
     - name: npm install and build
       run: |
         npm ci
         npm run build
       env:
         CI: true
+    - name: Commit files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Update files" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        directory: './dist'
+        repository: 'TechInterMezzo/beanshub-wochenplan-dist'
+        github_token: ${{ secrets.GitHubToken }}
