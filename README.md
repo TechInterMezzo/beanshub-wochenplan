@@ -1,24 +1,19 @@
-# wochenplan
+# BeansHub Wochenplan
 
-## Project setup
+## Description
+
+This Vue.js project provides an unofficial alternative frontend for the [rocketbeans.tv](https://rocketbeans.tv) [program schedule](https://rocketbeans.tv/sendeplan).
+
+## Website
+
+[beanshub.de/wochenplan](https://beanshub.de/wochenplan)
+
+## Build
 ```
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Disclaimer
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+BeansHub is a fanmade project and not part of Rocket Beans Entertainment GmbH.

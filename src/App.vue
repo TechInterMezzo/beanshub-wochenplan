@@ -1,29 +1,80 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+  <section id="app">
+    <navigation/>
+    <week/>
+  </section>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import Vue from "vue";
+import { mapGetters, mapMutations, mapActions } from "vuex";
+import dayjs from "dayjs";
+import Navigation from "./components/Navigation.vue";
+import Week from "./components/Week.vue";
 
 export default Vue.extend({
-  name: 'app',
+  name: "app",
+  created() {
+    setInterval(this.updateRealTime, 5 * 1000);
+
+    window.addEventListener("resize", this.updateViewWidth);
+    window.addEventListener("popstate", event => this.setCurrentDate(event.state));
+    window.addEventListener("dragstart", event => event.preventDefault(), true);
+
+    this.updateMeta();
+    this.setCurrentDate(this.getDefaultDate());
+  },
+  computed: {
+    activeSlotId(): string {
+      if (this.activeSlot) {
+        return "slot-" + dayjs(this.realDate).format("YYYYMMDD") + "-" + this.activeSlot.id;
+      }
+      return "";
+    },
+    ...mapGetters(["realDate", "dates", "activeSlot"])
+  },
+  watch: {
+    realDate(value: number): void {
+      this.setCurrentDate(value);
+    },
+    dates(value: number[]): void {
+      this.updateDays(value);
+    },
+    activeSlotId(value: string): void {
+      if (value) {
+        this.$nextTick(() => this.scrollToSlot(value));
+      }
+    }
+  },
+  methods: {
+    getDefaultDate(): number {
+      let url = location.href;
+      let baseUrl = document.getElementsByTagName("base")[0].href;
+      if (url.startsWith(baseUrl)) {
+        let path = url.substring(baseUrl.length);
+        let match = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/i.exec(path);
+        if (match) {
+          return new Date(parseInt(match[3]),parseInt(match[2]) - 1, parseInt(match[1])).valueOf();
+        }
+      }
+      return this.realDate;
+    },
+    scrollToSlot(slotId: string): void {
+      let element = document.getElementById(slotId);
+      if (element) {
+        element.scrollIntoView();
+      }
+    },
+    ...mapMutations(["updateRealTime", "updateViewWidth", "setCurrentDate", "setMouse"]),
+    ...mapActions(["updateMeta", "updateDays"])
+  },
   components: {
-    HelloWorld
+    Navigation,
+    Week
   }
 });
 </script>
 
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+@import "./common";
 </style>
