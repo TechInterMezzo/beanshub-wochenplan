@@ -17,14 +17,10 @@ jobs:
         npm run build
       env:
         CI: true
-    - name: Commit files
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git commit -m "Update files" -a
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        directory: './dist'
-        repository: 'TechInterMezzo/beanshub-wochenplan-dist'
-        github_token: ${{ secrets.GitHubToken }}
+    - name: Deploy
+      uses: s0/git-publish-subdir-action@master
+      env:
+        REPO: self
+        BRANCH: dist
+        FOLDER: dist
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
