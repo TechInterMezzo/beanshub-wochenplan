@@ -64,7 +64,7 @@ $navbar-breakpoint: 0;
 @import "bulma/bulma";
 
 html {
-    overflow: hidden;
+    scroll-behavior: smooth;
 }
 
 a[href]:hover {

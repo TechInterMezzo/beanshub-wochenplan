@@ -9,8 +9,8 @@ var metaUpdateHandle = 0;
 
 export default new Vuex.Store({
   state: {
-    realTime: Date.now(),
-    viewWidth: window.innerWidth,
+    realTime: 0,
+    viewWidth: 0,
     firstDate: 0,
     lastDate: 0,
     currentDate: 0,
@@ -74,7 +74,7 @@ export default new Vuex.Store({
       state.realTime = Date.now();
     },
     updateViewWidth(state): void {
-      state.viewWidth = window.innerWidth;
+      state.viewWidth = window.innerWidth * window.devicePixelRatio;
     },
     setCurrentDate(state, date: number): void {
       state.currentDate = date;

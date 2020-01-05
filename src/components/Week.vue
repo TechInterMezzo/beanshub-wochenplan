@@ -88,7 +88,7 @@ export default Vue.extend({
       return "slot-" + dayjs(day.date).format("YYYYMMDD") + "-" + slot.id;
     },
     getSlotClass(slot: Slot): string {
-      return "is-" + slot.type + (slot === this.activeSlot ? " has-text-warning has-background-black" : "");
+      return "is-" + slot.type + (slot === this.activeSlot ? " is-active" : "");
     },
     ...mapActions(["selectDate"])
   }
@@ -98,11 +98,6 @@ export default Vue.extend({
 <style lang="scss">
 @import "../common";
 .week {
-  height: calc(100vh - #{$navbar-height});
-  overflow-y: scroll;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-
   .column {
     padding: 0;
 
@@ -156,6 +151,10 @@ export default Vue.extend({
     }
     &.is-premiere::before {
       background-color: $info;
+    }
+    &.is-active {
+      background-color: $black;
+      color: $warning;
     }
     progress {
       position: absolute;

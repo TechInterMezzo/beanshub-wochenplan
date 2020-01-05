@@ -1,8 +1,11 @@
 <template>
-  <nav id="navigation" class="navbar">
+  <nav id="navigation" class="navbar navbar is-fixed-top">
     <div class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item" href="https://rocketbeans.tv" target="_blank" rel="noopener noreferrer">RBTV</a>
+        <a class="navbar-item" href="/">BeansHub</a>
+        <a class="navbar-item" :href="previousDate | date" @click.prevent="selectDate(previousDate)" v-show="hasPreviousDate">
+          <fa :icon="['fas', 'angle-left']" size="2x" />
+        </a>
         <div class="navbar-item has-dropdown" :class="datePickerMenuClass" v-click-outside="closeDatePicker">
           <a class="navbar-link" @click="toggleDatePicker">{{ currentDate | year }} KW {{ currentDate | week }}</a>
           <div class="navbar-dropdown">
@@ -11,9 +14,6 @@
             </div>
           </div>
         </div>
-        <a class="navbar-item" :href="previousDate | date" @click.prevent="selectDate(previousDate)" v-show="hasPreviousDate">
-          <fa :icon="['fas', 'angle-left']" size="2x" />
-        </a>
       </div>
       <div class="navbar-end">
         <a class="navbar-item is-right" :href="nextDate | date" @click.prevent="selectDate(nextDate)" v-show="hasNextDate">

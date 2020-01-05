@@ -15,6 +15,9 @@ import Week from "./components/Week.vue";
 export default Vue.extend({
   name: "app",
   created() {
+    this.updateRealTime();
+    this.updateViewWidth();
+
     setInterval(this.updateRealTime, 5 * 1000);
 
     window.addEventListener("resize", this.updateViewWidth);
@@ -60,9 +63,13 @@ export default Vue.extend({
       return this.realDate;
     },
     scrollToSlot(slotId: string): void {
-      let element = document.getElementById(slotId);
-      if (element) {
-        element.scrollIntoView();
+      let navigation = document.getElementById("navigation");
+      let slot = document.getElementById(slotId);
+      if (navigation && slot) {
+        this.$scrollTo(slot, {
+          offset: -navigation.clientHeight
+        });
+        //element.scrollIntoView();
       }
     },
     ...mapMutations(["updateRealTime", "updateViewWidth", "setCurrentDate", "setMouse"]),
