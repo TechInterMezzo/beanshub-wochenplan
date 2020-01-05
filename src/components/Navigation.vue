@@ -2,8 +2,7 @@
   <nav id="navigation" class="navbar navbar is-fixed-top">
     <div class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item" href="/">BeansHub</a>
-        <a class="navbar-item" :href="previousDate | date" @click.prevent="selectDate(previousDate)" v-show="hasPreviousDate">
+        <a class="navbar-item is-square" :href="previousDate | date" @click.prevent="selectDate(previousDate)" v-show="hasPreviousDate">
           <fa :icon="['fas', 'angle-left']" size="2x" />
         </a>
         <div class="navbar-item has-dropdown" :class="datePickerMenuClass" v-click-outside="closeDatePicker">
@@ -14,9 +13,10 @@
             </div>
           </div>
         </div>
+        <a class="navbar-item" href="/">BeansHub</a>
       </div>
       <div class="navbar-end">
-        <a class="navbar-item is-right" :href="nextDate | date" @click.prevent="selectDate(nextDate)" v-show="hasNextDate">
+        <a class="navbar-item is-square is-right" :href="nextDate | date" @click.prevent="selectDate(nextDate)" v-show="hasNextDate">
           <fa :icon="['fas', 'angle-right']" size="2x" />
         </a>
       </div>
@@ -61,4 +61,10 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
+@import "../common";
+
+.navbar-item.is-square {
+  width: $navbar-height;
+  justify-content: center;
+}
 </style>
