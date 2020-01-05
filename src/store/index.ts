@@ -74,7 +74,7 @@ export default new Vuex.Store({
       state.realTime = Date.now();
     },
     updateViewWidth(state): void {
-      state.viewWidth = window.innerWidth * window.devicePixelRatio;
+      state.viewWidth = window.innerWidth;
     },
     setCurrentDate(state, date: number): void {
       state.currentDate = date;
