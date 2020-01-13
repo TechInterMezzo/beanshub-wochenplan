@@ -67,7 +67,7 @@ html {
     scroll-behavior: smooth;
 }
 
-a[href]:hover {
+a[href]:hover:not(.button):not(.navbar-item) {
     text-decoration: underline;
 }
 

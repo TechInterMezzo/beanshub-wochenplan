@@ -14,11 +14,16 @@ export default new Vuex.Store({
     firstDate: 0,
     lastDate: 0,
     currentDate: 0,
-    days: <Day[]>[]
+    isCondensed: false,
+    days: new Array<Day>(),
+    heights: new Array<number>(3).fill(0)
   },
   getters: {
     dayCount(state): number {
-      return Math.min(Math.floor(state.viewWidth / 260), 7);
+      return Math.min(Math.floor(state.viewWidth / 240), 7);
+    },
+    hasMultipleDays(_state, getters): boolean {
+      return getters.dayCount > 1;
     },
     realDate(state): number {
       return dayjs(state.realTime).startOf('day').valueOf();
@@ -33,19 +38,19 @@ export default new Vuex.Store({
     previousDate(_state, getters): number {
       return dayjs(getters.startDate).subtract(getters.dayCount, 'day').valueOf();
     },
-    nextDate(_state, getter): number {
-      return dayjs(getter.startDate).add(getter.dayCount, 'day').valueOf();
+    nextDate(_state, getters): number {
+      return dayjs(getters.startDate).add(getters.dayCount, 'day').valueOf();
     },
-    hasPreviousDate(state, getter): boolean {
-      return state.firstDate > 0 && getter.nextDate >= state.firstDate;
+    hasPreviousDate(state, getters): boolean {
+      return state.firstDate > 0 && getters.nextDate >= state.firstDate;
     },
-    hasNextDate(state, getter): boolean {
-      return state.lastDate > 0 && getter.nextDate <= state.lastDate;
+    hasNextDate(state, getters): boolean {
+      return state.lastDate > 0 && getters.nextDate <= state.lastDate;
     },
-    dates(state, getter): number[] {
+    dates(state, getters): number[] {
       let dates = [];
-      let start = dayjs(getter.startDate);
-      for (let i = 0; i < getter.dayCount; i++) {
+      let start = dayjs(getters.startDate);
+      for (let i = 0; i < getters.dayCount; i++) {
         let date = start.add(i, 'day').valueOf();
         if (date >= state.firstDate && date <= state.lastDate) {
           dates.push(date);
@@ -53,16 +58,29 @@ export default new Vuex.Store({
       }
       return dates;
     },
-    activeSlot(state): Slot | null {
-      let now = state.realTime;
+    activeDay(state): Day | null {
       for (let day of state.days) {
-        if (day.date <= now && day.nextDate > now) {
-          for (let slotGroup of day.slotGroups) {
-            for (let slot of slotGroup) {
-              if (dayjs(slot.timeStart).valueOf() <= now && dayjs(slot.timeEnd).valueOf() > now) {
-                return slot;
-              }
-            }
+        if (day.date <= state.realTime && day.nextDate > state.realTime) {
+          return day;
+        }
+      }
+      return null;
+    },
+    activeSlotGroup(state, getters): SlotGroup | null {
+      if (getters.activeDay) {
+        for (let slotGroup of getters.activeDay.slotGroups) {
+          if (slotGroup.time <= state.realTime && slotGroup.nextTime > state.realTime) {
+            return slotGroup;
+          }
+        }
+      }
+      return null;
+    },
+    activeSlot(state, getters): Slot | null {
+      if (getters.activeSlotGroup) {
+        for (let slot of getters.activeSlotGroup.slots) {
+          if (dayjs(slot.timeStart).valueOf() <= state.realTime && dayjs(slot.timeEnd).valueOf() > state.realTime) {
+            return slot;
           }
         }
       }
@@ -73,8 +91,8 @@ export default new Vuex.Store({
     updateRealTime(state): void {
       state.realTime = Date.now();
     },
-    updateViewWidth(state): void {
-      state.viewWidth = window.innerWidth;
+    setViewWidth(state, width: number): void {
+      state.viewWidth = width;
     },
     setCurrentDate(state, date: number): void {
       state.currentDate = date;
@@ -85,9 +103,15 @@ export default new Vuex.Store({
     },
     setDays(state, days: Day[]): void {
       state.days = days;
+    },
+    setHeight(state, { index, value }): void {
+      state.heights.splice(index, 1, value);
     }
   },
   actions: {
+    updateViewWidth({ commit }): void {
+      commit('setViewWidth', window.innerWidth);
+    },
     selectDate({ commit, state, getters }, date?: number): void {
       let path = date ? dayjs(date).format('DD.MM.YYYY') : './';
       date = date || <number>getters.realDate;
@@ -108,37 +132,56 @@ export default new Vuex.Store({
       }
       metaUpdateHandle = setTimeout(() => dispatch('updateMeta'), 60 * 1000);
     },
-    updateDays({ commit, dispatch, state }, dates: number[]): void {
+    updateDays({ commit, dispatch }, dates: number[]): void {
       let pathes = dates.map(date => 'slots/' + dayjs(date).format('YYYY/MM/DD') + '.json');
       let days = sessionCache.getValues<Slot[]>(pathes, () => dispatch('updateDays', dates)).map((slots, index) => {
         if (!slots) {
           return [];
         }
         let date = dates[index];
-        let slotGroups: Slot[][] = new Array(6);
-        for (let i = 0; i < slotGroups.length; i++) {
-          slotGroups[i] = [];
-        }
-        let start = dayjs(date);
-        let intervals = [start.hour(10).minute(30), start.hour(20), start.add(1, 'day')];
-        let intervalIndex = 0;
-        for (let slot of slots) {
-          let time = dayjs(slot.timeStart);
-          while (!time.isBefore(intervals[intervalIndex])) {
-            intervalIndex++;
-          }
-          let index = intervalIndex * 2;
-          if (slotGroups[index].length == 0) {
-            slotGroups[index].push(slot);
-          } else {
-            slotGroups[index + 1].push(slot);
-          }
-        }
-        return <Day>{
-          date: dates[index],
-          nextDate: dayjs(dates[index]).add(1, 'day').valueOf(),
-          slotGroups: slotGroups
+        let nextDate = dayjs(date).add(1, 'day').valueOf();
+        let breakpoints = [dayjs(date).hour(10).minute(30), dayjs(date).hour(20)];
+        let intervals = breakpoints.map(breakpoint => [breakpoint.valueOf(), breakpoint.add(1, 'hour').valueOf()]);
+        let day: Day = {
+          date: date,
+          nextDate: dayjs(date).add(1, 'day').valueOf(),
+          slotGroups: [{
+            time: date,
+            nextTime: nextDate,
+            duration: 0,
+            firstIndex: 0,
+            lastIndex: 0,
+            slots: []
+          }]
         };
+        let intervalIndex = 0;
+        let groupIndex = 0;
+        for (let slot of slots) {
+          let time = dayjs(slot.timeStart).valueOf();
+          while (intervals[intervalIndex] && time >= intervals[intervalIndex][0]) {
+            if (time <= intervals[intervalIndex][1]) {
+              day.slotGroups[groupIndex].nextTime = intervals[intervalIndex][0];
+              day.slotGroups.push({
+                time: intervals[intervalIndex][0],
+                nextTime: nextDate,
+                duration: 0,
+                firstIndex: intervalIndex + 1,
+                lastIndex: intervalIndex + 1,
+                slots: []
+              });
+              intervalIndex++;
+              groupIndex++;
+            } else {
+              day.slotGroups[groupIndex].lastIndex = intervalIndex + 1;
+              intervalIndex++;
+            }
+          }
+          let group = day.slotGroups[groupIndex];
+          let timeEnd = dayjs(slot.timeEnd).valueOf();
+          group.duration += Math.floor((Math.min(timeEnd, day.nextDate) - Math.max(time, date)) / 1000);
+          group.slots.push(slot);
+        }
+        return day;
       });
       commit('setDays', days);
     }

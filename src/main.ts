@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Vue2TouchEvents from 'vue2-touch-events';
 import VClickOutside from 'v-click-outside';
-import VueScrollTo from'vue-scrollto';
 
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -27,7 +26,6 @@ Vue.component('fa', FontAwesomeIcon);
 
 Vue.use(Vue2TouchEvents, { swipeTolerance: 50 });
 Vue.use(VClickOutside);
-Vue.use(VueScrollTo);
 
 Vue.filter('year', function(value: any) {
   return value ? dayjs(value).year().toString() : '';

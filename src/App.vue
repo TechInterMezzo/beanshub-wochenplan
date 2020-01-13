@@ -1,16 +1,15 @@
 <template>
   <section id="app">
     <navigation/>
-    <week/>
+    <schedule/>
   </section>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { mapGetters, mapMutations, mapActions } from "vuex";
-import dayjs from "dayjs";
 import Navigation from "./components/Navigation.vue";
-import Week from "./components/Week.vue";
+import Schedule from "./components/Schedule.vue";
 
 export default Vue.extend({
   name: "app",
@@ -20,20 +19,14 @@ export default Vue.extend({
 
     setInterval(this.updateRealTime, 5 * 1000);
 
-    window.addEventListener("resize", this.updateViewWidth);
-    window.addEventListener("popstate", event => this.setCurrentDate(event.state));
+    window.addEventListener("resize", this.updateViewWidth, { passive: true });
+    window.addEventListener("popstate", event => this.setCurrentDate(event.state), { passive: true });
     window.addEventListener("dragstart", event => event.preventDefault(), true);
 
     this.updateMeta();
     this.setCurrentDate(this.getDefaultDate());
   },
   computed: {
-    activeSlotId(): string {
-      if (this.activeSlot) {
-        return "slot-" + dayjs(this.realDate).format("YYYYMMDD") + "-" + this.activeSlot.id;
-      }
-      return "";
-    },
     ...mapGetters(["realDate", "dates", "activeSlot"])
   },
   watch: {
@@ -42,11 +35,6 @@ export default Vue.extend({
     },
     dates(value: number[]): void {
       this.updateDays(value);
-    },
-    activeSlotId(value: string): void {
-      if (value) {
-        this.$nextTick(() => this.scrollToSlot(value));
-      }
     }
   },
   methods: {
@@ -62,22 +50,12 @@ export default Vue.extend({
       }
       return this.realDate;
     },
-    scrollToSlot(slotId: string): void {
-      let navigation = document.getElementById("navigation");
-      let slot = document.getElementById(slotId);
-      if (navigation && slot) {
-        this.$scrollTo(slot, {
-          offset: -navigation.clientHeight
-        });
-        //element.scrollIntoView();
-      }
-    },
-    ...mapMutations(["updateRealTime", "updateViewWidth", "setCurrentDate", "setMouse"]),
-    ...mapActions(["updateMeta", "updateDays"])
+    ...mapMutations(["updateRealTime", "setCurrentDate", "setMouse"]),
+    ...mapActions(["updateViewWidth", "updateMeta", "updateDays"])
   },
   components: {
     Navigation,
-    Week
+    Schedule
   }
 });
 </script>

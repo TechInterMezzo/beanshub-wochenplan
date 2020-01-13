@@ -27,8 +27,17 @@ interface Slot {
     type: 'live' | 'premiere' | 'rerun';
 }
 
+interface SlotGroup {
+    time: number;
+    nextTime: number;
+    duration: number;
+    firstIndex: number;
+    lastIndex: number;
+    slots: Slot[];
+}
+
 interface Day {
     date: number;
     nextDate: number;
-    slotGroups: Slot[][];
+    slotGroups: SlotGroup[];
 }
