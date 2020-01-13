@@ -44,6 +44,9 @@ export default Vue.extend({
       this.limitScroll();
     }
   },
+  mounted() {
+    this.updateBounds();
+  },
   computed: {
     slot(): Slot {
       return this.value.slot;
