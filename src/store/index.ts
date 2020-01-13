@@ -14,9 +14,9 @@ export default new Vuex.Store({
     firstDate: 0,
     lastDate: 0,
     currentDate: 0,
-    isCondensed: false,
     days: new Array<Day>(),
-    heights: new Array<number>(3).fill(0)
+    heights: new Array<number>(3).fill(0),
+    isCompressed: false
   },
   getters: {
     dayCount(state): number {
@@ -88,24 +88,27 @@ export default new Vuex.Store({
     }
   },
   mutations: {
-    updateRealTime(state): void {
+    updateRealTime(state) {
       state.realTime = Date.now();
     },
-    setViewWidth(state, width: number): void {
+    setViewWidth(state, width: number) {
       state.viewWidth = width;
     },
-    setCurrentDate(state, date: number): void {
+    setCurrentDate(state, date: number) {
       state.currentDate = date;
     },
-    setMetaDates(state, meta: Meta): void {
+    setMetaDates(state, meta: Meta) {
       state.firstDate = dayjs(meta.firstDate).valueOf();
       state.lastDate = dayjs(meta.lastDate).valueOf();
     },
-    setDays(state, days: Day[]): void {
+    setDays(state, days: Day[]) {
       state.days = days;
     },
-    setHeight(state, { index, value }): void {
+    setHeight(state, { index, value }) {
       state.heights.splice(index, 1, value);
+    },
+    setCompressed(state, value: boolean) {
+      state.isCompressed = value;
     }
   },
   actions: {
@@ -132,7 +135,8 @@ export default new Vuex.Store({
       }
       metaUpdateHandle = setTimeout(() => dispatch('updateMeta'), 60 * 1000);
     },
-    updateDays({ commit, dispatch }, dates: number[]): void {
+    updateDays({ commit, dispatch, state, getters }): void {
+      let dates: number[] = getters.dates;
       let pathes = dates.map(date => 'slots/' + dayjs(date).format('YYYY/MM/DD') + '.json');
       let days = sessionCache.getValues<Slot[]>(pathes, () => dispatch('updateDays', dates)).map((slots, index) => {
         if (!slots) {
@@ -150,23 +154,54 @@ export default new Vuex.Store({
             nextTime: nextDate,
             duration: 0,
             firstIndex: 0,
-            lastIndex: 0,
+            lastIndex: intervals.length,
             slots: []
           }]
         };
         let intervalIndex = 0;
         let groupIndex = 0;
+        let lastRerunSlot: Slot | null = null;
         for (let slot of slots) {
           let time = dayjs(slot.timeStart).valueOf();
+          if (state.isCompressed) {
+            if (slot.type == 'rerun') {
+              if (lastRerunSlot) {
+                lastRerunSlot.timeEnd = slot.timeEnd;
+                lastRerunSlot.duration += slot.duration;
+                day.slotGroups[groupIndex].duration += slot.duration;
+                continue;
+              } else {
+                lastRerunSlot = {
+                  id: slot.id,
+                  title: "Wiederholungen",
+                  topic: "",
+                  game: "",
+                  showId: 0,
+                  episodeId: 0,
+                  bohnen: [],
+                  timeStart: slot.timeStart,
+                  timeEnd: slot.timeEnd,
+                  duration: slot.duration,
+                  durationClass: 0,
+                  streamExclusive: false,
+                  type: 'rerun'
+                };
+                slot = lastRerunSlot;
+              }
+            } else {
+              lastRerunSlot = null;
+            }
+          }
           while (intervals[intervalIndex] && time >= intervals[intervalIndex][0]) {
             if (time <= intervals[intervalIndex][1]) {
               day.slotGroups[groupIndex].nextTime = intervals[intervalIndex][0];
+              day.slotGroups[groupIndex].lastIndex = intervalIndex;
               day.slotGroups.push({
                 time: intervals[intervalIndex][0],
                 nextTime: nextDate,
                 duration: 0,
                 firstIndex: intervalIndex + 1,
-                lastIndex: intervalIndex + 1,
+                lastIndex: intervals.length,
                 slots: []
               });
               intervalIndex++;
@@ -176,10 +211,9 @@ export default new Vuex.Store({
               intervalIndex++;
             }
           }
-          let group = day.slotGroups[groupIndex];
-          let timeEnd = dayjs(slot.timeEnd).valueOf();
-          group.duration += Math.floor((Math.min(timeEnd, day.nextDate) - Math.max(time, date)) / 1000);
-          group.slots.push(slot);
+          let slotGroup = day.slotGroups[groupIndex];
+          slotGroup.duration += slot.duration;
+          slotGroup.slots.push(slot);
         }
         return day;
       });

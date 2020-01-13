@@ -7,7 +7,7 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import 'dayjs/locale/de';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft, faAngleRight, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -18,7 +18,7 @@ import store from './store';
 dayjs.extend(weekOfYear);
 dayjs.locale('de');
 
-library.add(faAngleLeft, faAngleRight, faClock, faYoutube);
+library.add(faAngleLeft, faAngleRight, faCompress, faExpand, faClock, faYoutube);
 
 Vue.config.productionTip = false;
 

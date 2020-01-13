@@ -64,7 +64,7 @@ class WebCache {
         return changed;
     }
     private getItem<T>(key: string) : CacheItem<T> {
-        let item = this.storage.getItem('cache_' + key);
+        let item = this.storage.getItem('wp_cache_' + key);
         return item ? JSON.parse(item) : {
             value: null,
             etag: '',
@@ -72,7 +72,7 @@ class WebCache {
         };
     }
     private setItem<T>(key: string, item: CacheItem<T>) : void {
-        this.storage.setItem('cache_' + key, JSON.stringify(item));
+        this.storage.setItem('wp_cache_' + key, JSON.stringify(item));
     }
     private getHeaders(etag: string) : Headers {
         return etag ? { 'If-None-Match': etag } : {};

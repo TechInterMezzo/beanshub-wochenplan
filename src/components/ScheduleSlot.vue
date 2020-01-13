@@ -73,24 +73,16 @@ export default Vue.extend({
       };
     },
     weight(): number {
-      let startTime = dayjs(this.slot.timeStart).valueOf();
-      let endTime = dayjs(this.slot.timeEnd).valueOf();
-      if (startTime < this.day.date) {
-        startTime = this.day.date;
-      }
-      if (endTime >= this.day.nextDate) {
-        endTime = this.day.nextDate;
-      }
-      return (endTime - startTime) / (this.slotGroup.duration * 1000);
+      return this.slot.duration / this.slotGroup.duration
     },
     videoUrl(): string {
       return 'https://rocketbeans.tv/mediathek/video/' + this.slot.episodeId;
     },
     progress(): number {
       if (this.activeSlot) {
-        let start = dayjs(this.activeSlot.timeStart).valueOf();
-        let end = dayjs(this.activeSlot.timeEnd).valueOf();
-        return Math.floor(((this.realTime - start) / (end - start)) * 100);
+        let startTime = dayjs(this.activeSlot.timeStart).valueOf();
+        let endTime = dayjs(this.activeSlot.timeEnd).valueOf();
+        return Math.floor(((this.realTime - startTime) / (endTime - startTime)) * 100);
       }
       return 0;
     },

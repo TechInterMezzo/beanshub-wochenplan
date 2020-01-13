@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { mapGetters, mapMutations, mapActions } from "vuex";
+import { mapState, mapGetters, mapMutations, mapActions } from "vuex";
 import Navigation from "./components/Navigation.vue";
 import Schedule from "./components/Schedule.vue";
 
@@ -16,6 +16,7 @@ export default Vue.extend({
   created() {
     this.updateRealTime();
     this.updateViewWidth();
+    this.setCompressed(localStorage.getItem('wp_config_compressed') == 'true');
 
     setInterval(this.updateRealTime, 5 * 1000);
 
@@ -27,14 +28,19 @@ export default Vue.extend({
     this.setCurrentDate(this.getDefaultDate());
   },
   computed: {
+    ...mapState(["isCompressed"]),
     ...mapGetters(["realDate", "dates", "activeSlot"])
   },
   watch: {
-    realDate(value: number): void {
+    realDate(value: number) {
       this.setCurrentDate(value);
     },
-    dates(value: number[]): void {
+    dates(value: number[]) {
       this.updateDays(value);
+    },
+    isCompressed(value: boolean) {
+      localStorage.setItem('wp_config_compressed', value ? 'true' : 'false');
+      this.updateDays(this.dates);
     }
   },
   methods: {
@@ -50,7 +56,7 @@ export default Vue.extend({
       }
       return this.realDate;
     },
-    ...mapMutations(["updateRealTime", "setCurrentDate", "setMouse"]),
+    ...mapMutations(["updateRealTime", "setCurrentDate", "setCompressed"]),
     ...mapActions(["updateViewWidth", "updateMeta", "updateDays"])
   },
   components: {

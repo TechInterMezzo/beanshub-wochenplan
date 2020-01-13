@@ -67,7 +67,6 @@ export default Vue.extend({
 
     .head {
       background: $black-ter;
-      border-bottom: 2px solid $black-bis;
     }
     .slot {
       border-top: 1px solid $grey-darker;
@@ -79,7 +78,6 @@ export default Vue.extend({
 
     .head {
       background: $grey-darker;
-      border-bottom: 2px solid $black-ter;
     }
     .slot {
       border-top: 1px solid $grey-dark;
