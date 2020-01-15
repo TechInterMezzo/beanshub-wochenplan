@@ -102,7 +102,7 @@ export default Vue.extend({
       top: 4.25rem;
       width: 100%;
       height: 12px;
-      background-image: linear-gradient(to bottom, rgba($black, 0.33), rgba($black, 0));
+      background-image: linear-gradient(to bottom, rgba($black, 0.5), rgba($black, 0));
     }
   }
   .slots {

@@ -8,7 +8,7 @@
         {{ slot.duration | duration }}
         &nbsp;
       </span>
-      <a :href="videoUrl" target="_blank" rel="noopener noreferrer" class="has-text-grey" v-if="slot.episodeId">
+      <a :href="videoUrl" target="_blank" rel="noopener noreferrer" class="has-text-grey" v-if="videoUrl">
         <fa :icon="['fab', 'youtube']" />
       </a>
     </div>
@@ -76,7 +76,15 @@ export default Vue.extend({
       return this.slot.duration / this.slotGroup.duration
     },
     videoUrl(): string {
-      return 'https://rocketbeans.tv/mediathek/video/' + this.slot.episodeId;
+      if (this.slot.episodeId) {
+        return 'https://rocketbeans.tv/mediathek/video/' + this.slot.episodeId;
+      } else {
+        let startTime = dayjs(this.slot.timeStart).valueOf();
+        if (startTime < this.realTime && startTime >= dayjs(this.realTime).subtract(12, 'hour').valueOf()) {
+          return 'https://beanshub.de/player/?video=' + this.streamId + '&time=' + Math.ceil(startTime / 1000);
+        }
+      }
+      return '';
     },
     progress(): number {
       if (this.activeSlot) {
@@ -86,7 +94,7 @@ export default Vue.extend({
       }
       return 0;
     },
-    ...mapState(["realTime", "heights"]),
+    ...mapState(["realTime", "streamId", "heights"]),
     ...mapGetters(["activeDay", "activeSlot"])
   },
   watch: {

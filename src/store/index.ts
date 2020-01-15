@@ -11,6 +11,7 @@ export default new Vuex.Store({
   state: {
     realTime: 0,
     viewWidth: 0,
+    streamId: '',
     firstDate: 0,
     lastDate: 0,
     currentDate: 0,
@@ -97,7 +98,8 @@ export default new Vuex.Store({
     setCurrentDate(state, date: number) {
       state.currentDate = date;
     },
-    setMetaDates(state, meta: Meta) {
+    setMeta(state, meta: Meta) {
+      state.streamId = meta.youtubeStreamId;
       state.firstDate = dayjs(meta.firstDate).valueOf();
       state.lastDate = dayjs(meta.lastDate).valueOf();
     },
@@ -130,7 +132,7 @@ export default new Vuex.Store({
       clearTimeout(metaUpdateHandle);
       let meta = sessionCache.getValue<Meta>('meta.json', () => dispatch('updateMeta'));
       if (meta) {
-        commit('setMetaDates', meta);
+        commit('setMeta', meta);
         dispatch('updateDays', getters.dates);
       }
       metaUpdateHandle = setTimeout(() => dispatch('updateMeta'), 60 * 1000);
